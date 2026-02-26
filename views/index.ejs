@@ -33,6 +33,7 @@
                         <option value="getCart">GET Cart Items</option>
                         <option value="addToCart">POST Add to Cart</option>
                         <option value="createOrder">POST Place Order</option>
+                        <option value="getOrders">GET All Orders</option>
                     </select>
                 </div>
                 <div class="card-body">
@@ -104,7 +105,8 @@
         updatePrice: { method: 'PATCH', url: '/products/price', body: { id: 1, price: 85000 } },
         getCart: { method: 'GET', url: '/cart', body: {} },
         addToCart: { method: 'POST', url: '/cart', body: { productId: 1, quantity: 1 } },
-        createOrder: { method: 'POST', url: '/orders', body: { items: [{ productId: 1, quantity: 1 }] } }
+        createOrder: { method: 'POST', url: '/orders', body: { items: [{ productId: 1, quantity: 1 }] } },
+        getOrders: { method: 'GET', url: '/orders', body: {} },  
     };
 
     function applyQuickFill() {

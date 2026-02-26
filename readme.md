@@ -1,6 +1,8 @@
 # 🛒 E-Commerce API System
 
-A robust, production-ready backend built with **Node.js**, **Express**, and **SQLite3**. This system provides a comprehensive API for managing product catalogs, persistent shopping carts, and a transactional ordering system.
+> A production-ready REST API backend for managing products, carts, and orders — built with **Node.js**, **Express**, and **SQLite3**.
+
+Designed with a clean **layered architecture**, transactional data integrity, and a **built-in browser dashboard** that lets you test every endpoint without leaving your browser.
 
 ---
 
@@ -13,19 +15,21 @@ A robust, production-ready backend built with **Node.js**, **Express**, and **SQ
 - **Search & Discovery:** Partial-match search functionality using SQL `LIKE` queries for a seamless user experience.
 - **Custom Middleware:** Dedicated middleware layer for request validation and error handling.
 - **Validation & Security:** Robust input validation to handle invalid requests (e.g., negative prices or missing fields) and CORS enabled for frontend integration.
+- **Built-in API Dashboard:** A browser-based Mini Postman UI served at `http://localhost:5000` for live endpoint testing without any external tools.
 - **Environment Config:** Separate `env/` setup for easy environment variable management.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer          | Technology                                   |
-| -------------- | -------------------------------------------- |
-| **Runtime**    | Node.js (ES Modules)                         |
-| **Framework**  | Express.js                                   |
-| **Database**   | SQLite3                                      |
-| **Middleware** | CORS, Express JSON Parser, Custom Validators |
-| **Testing**    | Postman / Thunder Client                     |
+| Layer               | Technology                                    |
+| ------------------- | --------------------------------------------- |
+| **Runtime**         | Node.js (ES Modules)                          |
+| **Framework**       | Express.js                                    |
+| **Database**        | SQLite3                                       |
+| **Template Engine** | EJS (for dashboard UI)                        |
+| **Middleware**      | CORS, Express JSON Parser, Custom Validators  |
+| **Testing**         | Built-in Dashboard / Postman / Thunder Client |
 
 ---
 
@@ -40,6 +44,8 @@ ECommerceBackendAPI/
 ├── middlewares/        # Custom middleware (validation, error handling)
 ├── models/             # SQL queries & database schema methods
 ├── routes/             # API route definitions
+├── views/
+│   └── index.ejs       # Browser dashboard (Mini Postman + Inventory table)
 ├── app.js              # Main entry point & middleware registration
 ├── seed.js             # Script to seed the database with example data
 ├── package.json        # Project metadata & scripts
@@ -82,6 +88,23 @@ The API will be accessible at `http://localhost:5000`.
 
 ---
 
+## 🖥️ Built-in API Dashboard
+
+Once the server is running, open your browser and navigate to:
+
+```
+http://localhost:5000
+```
+
+You'll find a live **Backend API Dashboard** with two panels:
+
+- **📊 Product Inventory** — A real-time table showing all products with ID, name, price (₹), and stock status. Click **🔄 Sync Inventory** to refresh.
+- **🚀 Mini Postman** — A built-in request tester. Select an HTTP method, enter an endpoint URL, provide a JSON body, and hit **SEND REQUEST** to test any API call directly in the browser. Pre-loaded endpoint shortcuts are available from the dropdown.
+
+> No external tools needed for basic testing — just start the server and open the dashboard.
+
+---
+
 ## 📡 API Endpoints
 
 ### 📦 Products Endpoints
@@ -92,8 +115,8 @@ The API will be accessible at `http://localhost:5000`.
 | `GET`   | `/products/:id`          | Get details for a specific product      |
 | `GET`   | `/products/search?q=...` | Search products by name (partial match) |
 | `POST`  | `/products`              | Add a new product (Admin)               |
-| `PATCH` | `/products/price`        | Update a product's price                |
-| `PATCH` | `/products/stock`        | Manually update stock levels            |
+| `PATCH` | `/products/price`        | Update a product's price (Admin)        |
+| `PATCH` | `/products/stock`        | Manually update stock levels (Admin)    |
 
 **Example — Update Price:**
 
@@ -118,11 +141,15 @@ POST /cart
 { "productId": 1, "quantity": 1 }
 ```
 
+> **Note:** The cart add endpoint follows REST conventions as `POST /cart` rather than `POST /cart/add`. Both approaches are functionally equivalent — the RESTful style is preferred as the HTTP verb already communicates the intent.
+
 ### 🧾 Orders Endpoints
 
-| Method | Endpoint  | Description                               |
-| ------ | --------- | ----------------------------------------- |
-| `POST` | `/orders` | Place an order (triggers stock deduction) |
+| Method | Endpoint      | Description                               |
+| ------ | ------------- | ----------------------------------------- |
+| `GET`  | `/orders`     | Fetch all orders                          |
+| `GET`  | `/orders/:id` | Get details of a specific order by ID     |
+| `POST` | `/orders`     | Place an order (triggers stock deduction) |
 
 **Example — Place Order:**
 
@@ -131,9 +158,21 @@ POST /orders
 { "items": [{ "productId": 1, "quantity": 1 }] }
 ```
 
+**Example — Order Response:**
+
+```json
+{ "orderId": "ord_123", "total": 80000 }
+```
+
 ---
 
-## 🧪 Testing with Postman / Thunder Client
+## 🧪 Testing
+
+### Option A — Browser Dashboard (Quickest)
+
+Start the server and visit `http://localhost:5000`. Use the **Mini Postman** panel with pre-loaded endpoint presets to test any route instantly.
+
+### Option B — Postman / Thunder Client
 
 1. **Product Discovery:** `GET /products/search?q=iPhone` — verifies partial-match search filters correctly.
 2. **Constraint Validation:** Attempt to add a product with a negative price — server should respond with `400 Bad Request`.
@@ -143,12 +182,22 @@ POST /orders
 
 ---
 
+## 🔭 Known Scope & Limitations
+
+This project is scoped as a backend API assignment. The following are intentional omissions, not oversights:
+
+- **No Authentication/Authorization** — endpoints are open by design for ease of evaluation. In a production system, admin routes (`POST /products`, `PATCH /products/price`) would be protected via JWT or session-based auth.
+- **SQLite for storage** — ideal for local development and assignments. For high-concurrency production deployments, a client-server database like PostgreSQL or MySQL would be more appropriate as SQLite does not support concurrent writes.
+
+---
+
 ## ✅ Final Submission Checklist
 
 - [x] CORS enabled for cross-origin requests.
 - [x] Layered Architecture (Routes ➔ Controllers ➔ Models).
 - [x] Custom Middlewares for validation and error handling.
 - [x] Database Transactions implemented for stock updates.
+- [x] Built-in EJS dashboard served at `http://localhost:5000`.
 - [x] Environment configuration via `env/` folder.
 - [x] `"type": "module"` configured in `package.json`.
 
