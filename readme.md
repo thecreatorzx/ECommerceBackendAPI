@@ -36,16 +36,16 @@ ECommerceBackendAPI/
 ├── config/             # Database connection & SQLite setup
 ├── controllers/        # Request handling & business logic
 ├── database/           # SQLite database files
-├── env/                # Environment variable configuration
+├── env/                # Environment variable configuration (port, etc.)
 ├── middlewares/        # Custom middleware (validation, error handling)
 ├── models/             # SQL queries & database schema methods
 ├── routes/             # API route definitions
 ├── app.js              # Main entry point & middleware registration
+├── seed.js             # Script to seed the database with example data
 ├── package.json        # Project metadata & scripts
 ├── package-lock.json   # Dependency lock file
 ├── .gitignore          # Git ignored files
-├── README.md           # Documentation
-└── seed.js             # Seed the database with example data.
+└── README.md           # Documentation
 ```
 
 ---
@@ -62,9 +62,17 @@ npm install
 
 ### 2. Environment Setup
 
-Configure your environment variables inside the `env/` folder as required before starting the server. (For now there is no need as it contains only the port variable.)
+Configure your environment variables inside the `env/` folder as needed. Currently it only contains the port variable — no extra setup required to get started.
 
-### 3. Running the Server
+### 3. Seed the Database
+
+Populate the database with example products:
+
+```bash
+node seed.js
+```
+
+### 4. Start the Server
 
 ```bash
 npm start
@@ -76,16 +84,23 @@ The API will be accessible at `http://localhost:5000`.
 
 ## 📡 API Endpoints
 
-### 📦 Product Endpoints
+### 📦 Products Endpoints
 
-| Method  | Endpoint                | Description                             |
-| ------- | ----------------------- | --------------------------------------- |
-| `GET`   | `/product`              | Fetch all products in the catalog       |
-| `GET`   | `/product/:id`          | Get details for a specific product      |
-| `GET`   | `/product/search?q=...` | Search products by name (partial match) |
-| `POST`  | `/product`              | Add a new product (Admin)               |
-| `PATCH` | `/product/price`        | Update a product's price                |
-| `PATCH` | `/product/stock`        | Manually update stock levels            |
+| Method  | Endpoint                 | Description                             |
+| ------- | ------------------------ | --------------------------------------- |
+| `GET`   | `/products`              | Fetch all products in the catalog       |
+| `GET`   | `/products/:id`          | Get details for a specific product      |
+| `GET`   | `/products/search?q=...` | Search products by name (partial match) |
+| `POST`  | `/products`              | Add a new product (Admin)               |
+| `PATCH` | `/products/price`        | Update a product's price                |
+| `PATCH` | `/products/stock`        | Manually update stock levels            |
+
+**Example — Update Price:**
+
+```json
+PATCH /products/price
+{ "id": 1, "price": 85000 }
+```
 
 ### 🛒 Cart Endpoints
 
@@ -96,21 +111,35 @@ The API will be accessible at `http://localhost:5000`.
 | `DELETE` | `/cart/:id` | Remove a specific item from the cart        |
 | `DELETE` | `/cart`     | Clear the entire cart                       |
 
-### 🧾 Order Endpoints
+**Example — Add to Cart:**
 
-| Method | Endpoint | Description                               |
-| ------ | -------- | ----------------------------------------- |
-| `POST` | `/order` | Place an order (Triggers stock deduction) |
+```json
+POST /cart
+{ "productId": 1, "quantity": 1 }
+```
+
+### 🧾 Orders Endpoints
+
+| Method | Endpoint  | Description                               |
+| ------ | --------- | ----------------------------------------- |
+| `POST` | `/orders` | Place an order (triggers stock deduction) |
+
+**Example — Place Order:**
+
+```json
+POST /orders
+{ "items": [{ "productId": 1, "quantity": 1 }] }
+```
 
 ---
 
 ## 🧪 Testing with Postman / Thunder Client
 
-1. **Product Discovery:** Use `GET /product/search?q=iPhone` to verify partial-match search filters correctly.
+1. **Product Discovery:** `GET /products/search?q=iPhone` — verifies partial-match search filters correctly.
 2. **Constraint Validation:** Attempt to add a product with a negative price — server should respond with `400 Bad Request`.
 3. **Atomic Checkout:**
-   - Place an order for a quantity that exists. Verify stock is deducted.
-   - Place an order for a quantity exceeding stock. Verify the transaction rolls back and no order is created.
+   - Place an order for a quantity that exists → verify stock is deducted.
+   - Place an order exceeding available stock → verify the transaction rolls back and no order is created.
 
 ---
 

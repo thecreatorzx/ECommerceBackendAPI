@@ -10,9 +10,9 @@ import {
 
 const productRoutes = express.Router();
 productRoutes.route("/").get(getAllProducts).post(addToProducts);
-productRoutes.route("/:id").get(getProductById);
 productRoutes.route("/price").patch(updatePrice);
 productRoutes.route("/stock").patch(updateStock);
 productRoutes.route("/search").get(searchProducts);
+productRoutes.route("/:id").get(getProductById);
 
 export { productRoutes };
