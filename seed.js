@@ -1,5 +1,5 @@
 // src/seed.js
-import ProductModel from "../models/productModel.js";
+import ProductModel from "./models/productModel.js";
 
 const categories = [
   // Phones & Accessories
