@@ -6,6 +6,48 @@ Designed with a clean **layered architecture**, transactional data integrity, an
 
 ---
 
+## 🖥️ Built-in API Dashboard
+
+Once the server is running, open your browser and navigate to:
+
+```
+http://localhost:5000
+```
+
+The dashboard is split into two panels side by side:
+
+- **🚀 Mini Postman (left)** — A built-in request tester. Select an HTTP method, enter an endpoint URL, provide a JSON body, and hit **SEND REQUEST**. Pre-loaded endpoint shortcuts are available from the quick-load dropdown. The server response is displayed inline in the dark terminal panel below.
+- **📊 Current Product Inventory (right)** — A live table showing all seeded products with their ID, name, price (₹), and colour-coded stock badge. Click **🔄 Sync Inventory** (top-right) to refresh after any stock-changing operation.
+
+> No external tools needed for basic testing — just start the server and open the dashboard.
+
+### Dashboard Overview
+
+![Backend API Dashboard — default view](./screenshots/img1.png)
+_The full dashboard on load: Mini Postman panel on the left pre-loaded with `GET /products`, and the live product inventory table on the right showing all seeded items with stock levels._
+
+### Product Search
+
+![Search products by name](./screenshots/img3.png)
+_Using the **SEARCH Products (iPhone)** preset loads `GET /products/search?q=iPhone`. The server response returns a filtered JSON result with `"count": 1` and the matching product — iPhone 15 Pro at ₹120,000 with 15 in stock._
+
+### Update Cart Item Quantity
+
+![PATCH cart item quantity](./screenshots/img4.png)
+_A `PATCH /cart` request with body `{"productId": 1, "increment": 4}` updates the quantity of an existing cart item. The server responds with `"Successfully updated the item quantity"`._
+
+### Place an Order
+
+![POST to place an order](./screenshots/img6.png)
+_A `POST /orders` request triggers the full checkout flow — SQL transaction, stock deduction, and order creation. The response confirms success with `"Order placed successfully"`, the computed `"total": 648000`, and the new `"orderId": 1`._
+
+### Stock Deduction After Order
+
+![GET all products showing updated stock](./screenshots/img7.png)
+_After placing the order, a `GET /products` call shows the inventory has been updated in real time — iPhone 15 Pro stock has dropped from 15 to **10 in stock**, confirming the transactional stock deduction worked correctly._
+
+---
+
 ## 🚀 Key Features
 
 - **Layered Architecture:** Strict separation of concerns using the **Model-Controller-Route** pattern for high maintainability.
@@ -44,6 +86,12 @@ ECommerceBackendAPI/
 ├── middlewares/        # Custom middleware (validation, error handling)
 ├── models/             # SQL queries & database schema methods
 ├── routes/             # API route definitions
+├── screenshots/        # README screenshots
+│   ├── img1.png
+│   ├── img3.png
+│   ├── img4.png
+│   ├── img6.png
+│   └── img7.png
 ├── views/
 │   └── index.ejs       # Browser dashboard (Mini Postman + Inventory table)
 ├── app.js              # Main entry point & middleware registration
@@ -88,23 +136,6 @@ The API will be accessible at `http://localhost:5000`.
 
 ---
 
-## 🖥️ Built-in API Dashboard
-
-Once the server is running, open your browser and navigate to:
-
-```
-http://localhost:5000
-```
-
-You'll find a live **Backend API Dashboard** with two panels:
-
-- **📊 Product Inventory** — A real-time table showing all products with ID, name, price (₹), and stock status. Click **🔄 Sync Inventory** to refresh.
-- **🚀 Mini Postman** — A built-in request tester. Select an HTTP method, enter an endpoint URL, provide a JSON body, and hit **SEND REQUEST** to test any API call directly in the browser. Pre-loaded endpoint shortcuts are available from the dropdown.
-
-> No external tools needed for basic testing — just start the server and open the dashboard.
-
----
-
 ## 📡 API Endpoints
 
 ### 📦 Products Endpoints
@@ -131,6 +162,7 @@ PATCH /products/price
 | -------- | ----------- | ------------------------------------------- |
 | `GET`    | `/cart`     | Retrieve all items in the current cart      |
 | `POST`   | `/cart`     | Add a product to the cart / Update quantity |
+| `PATCH`  | `/cart`     | Increment or decrement item quantity        |
 | `DELETE` | `/cart/:id` | Remove a specific item from the cart        |
 | `DELETE` | `/cart`     | Clear the entire cart                       |
 
@@ -139,6 +171,13 @@ PATCH /products/price
 ```json
 POST /cart
 { "productId": 1, "quantity": 1 }
+```
+
+**Example — Update Quantity:**
+
+```json
+PATCH /cart
+{ "productId": 1, "increment": 4 }
 ```
 
 > **Note:** The cart add endpoint follows REST conventions as `POST /cart` rather than `POST /cart/add`. Both approaches are functionally equivalent — the RESTful style is preferred as the HTTP verb already communicates the intent.
@@ -155,13 +194,18 @@ POST /cart
 
 ```json
 POST /orders
-{ "items": [{ "productId": 1, "quantity": 1 }] }
+{ "items": [{ "productId": 1, "quantity": 5 }] }
 ```
 
 **Example — Order Response:**
 
 ```json
-{ "orderId": "ord_123", "total": 80000 }
+{
+  "success": true,
+  "message": "Order placed successfully",
+  "total": 648000,
+  "orderId": 1
+}
 ```
 
 ---
@@ -170,7 +214,7 @@ POST /orders
 
 ### Option A — Browser Dashboard (Quickest)
 
-Start the server and visit `http://localhost:5000`. Use the **Mini Postman** panel with pre-loaded endpoint presets to test any route instantly.
+Start the server and visit `http://localhost:5000`. Use the **Mini Postman** panel with pre-loaded endpoint presets to test any route instantly. The right panel shows live inventory — hit **Sync Inventory** after any stock-changing operation to confirm updates.
 
 ### Option B — Postman / Thunder Client
 
